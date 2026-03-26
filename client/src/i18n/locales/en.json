@@ -1,0 +1,220 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "skills": "Skills",
+    "projects": "Projects",
+    "blog": "Blog",
+    "contact": "Contact",
+    "admin": "Admin"
+  },
+  "hero": {
+    "subtitle": "Future Ready Developer",
+    "title": "IBRAHIM LOTFI",
+    "build": "I build",
+    "cta_work": "View Work",
+    "cta_contact": "Contact Me",
+    "typewriter": {
+      "ai": "Artificial Intelligence Solutions",
+      "web": "Futuristic Web Applications",
+      "digital": "High-Performance Digital Experiences"
+    }
+  },
+  "about": {
+    "title": "About",
+    "me": "Me",
+    "desc_1": "A dedicated specialist in Computing and Intelligent Systems with a Bachelor's in Computers and Information, focusing on transforming complex data into sophisticated digital solutions.",
+    "desc_2": "I engineer digital ecosystems that seamlessly blend cutting-edge AI logic with high-end web aesthetics. My mission is to create intelligent, responsive, and futuristic user experiences that define the next generation of digital interaction.",
+    "stats": {
+      "years": "Years Exp",
+      "projects": "Projects",
+      "visitors": "Visitors",
+      "dedication": "Dedication"
+    }
+  },
+  "skills": {
+    "title": "Technical",
+    "subtitle": "Arsenal",
+    "desc_1": "My stack is built for performance, scalability, and futuristic interactions.",
+    "fallback": "Go to Admin panel to add your technical skills.",
+    "categories": {
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "ai": "AI & ML",
+      "tools": "Tools"
+    }
+  },
+  "projects": {
+    "title": "Featured",
+    "subtitle": "Projects",
+    "desc_1": "Selected works from my digital lab.",
+    "filter_all": "All",
+    "view_details": "View Details",
+    "live_demo": "Live Demo",
+    "view_archives": "View All Archives",
+    "details_not_found": "Project Not Found",
+    "back_home": "Back to Home",
+    "back_projects": "Back to Projects",
+    "featured": "Featured Project",
+    "source_code": "Source Code",
+    "about": "About this project",
+    "tech_stack": "Technologies Used",
+    "view_all": "View All Projects"
+  },
+  "contact": {
+    "title": "Get in",
+    "touch": "Touch",
+    "subtitle": "Available for futuristic projects and AI collaborations.",
+    "form": {
+      "name": "Your Name",
+      "email": "Email Address",
+      "message": "Your Message",
+      "send": "Send Message",
+      "sending": "Sending...",
+      "success_title": "Message Sent! ✅",
+      "success_desc": "Your message has been sent successfully.",
+      "error_title": "Error ❌",
+      "error_desc": "Server error occurred."
+    },
+    "info": {
+      "email": "Email",
+      "phone": "Phone",
+      "location": "Location",
+      "address": "Sharqia, Egypt",
+      "whatsapp": "WhatsApp Chat",
+      "linkedin": "LinkedIn Profile"
+    }
+  },
+  "blog": {
+    "title": "Digital",
+    "subtitle": "Insights",
+    "desc_1": "Writing about the future of technology, AI integration, and modern web development practices.",
+    "read_more": "Read More",
+    "empty": "No posts published yet. Stay tuned!",
+    "error": "Failed to load posts. Please try again later.",
+    "seo_title": "Blog | Ibrahim Lotfi",
+    "seo_desc": "Insights and articles on AI, Web Development, and Digital Innovation.",
+    "not_found": "Post Not Found",
+    "back_blog": "Back to Blog",
+    "all_posts": "Back to all posts",
+    "reading_time": "5 min read"
+  },
+  "common": {
+    "loading": "Loading...",
+    "back": "Back",
+    "rights": "All rights reserved.",
+    "404_title": "404 Page Not Found",
+    "404_desc": "Did you forget to add the page to the router?"
+  },
+  "chat": {
+    "header": "AI ASSISTANT",
+    "welcome": "Hello! How can I help you today?",
+    "placeholder": "Ask something...",
+    "human_response": "Human Response"
+  },
+  "login": {
+    "title": "Admin Login",
+    "subtitle": "Enter your credentials to access dashboard",
+    "username": "Username",
+    "password": "Password",
+    "username_placeholder": "Enter username",
+    "password_placeholder": "Enter password",
+    "show": "Show",
+    "hide": "Hide",
+    "remember": "Remember me",
+    "signin": "Login",
+    "signing_in": "Logging in...",
+    "error_required": "All fields are required"
+  },
+  "seo": {
+    "default_title": "Ibrahim Lotfi | AI & Web Developer",
+    "default_desc": "Portfolio of Ibrahim Lotfi, a specialized AI and Web Developer building futuristic digital experiences.",
+    "default_keywords": "AI Developer, Web Development, Portfolio, Ibrahim Lotfi, React, Node.js"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "analytics": "Analytics",
+    "messages": "Messages",
+    "projects": "Projects",
+    "blog": "Blog",
+    "skills": "Skills",
+    "testimonials": "Testimonials",
+    "settings": "Settings",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add_new": "Add New",
+    "loading": "Loading data...",
+    "analytics_view": {
+      "total_messages": "Total Messages",
+      "total_visits": "Total Website Visits",
+      "total_projects": "Total Projects Showcased",
+      "total_posts": "Total Blog Articles",
+      "total_skills": "Core Skills Listed",
+      "response_rate": "Response Rate",
+      "active_chats": "Active Chats",
+      "activity_7d": "Message Activity (Last 7 Days)",
+      "status_dist": "Message Status",
+      "health": "System Health",
+      "audit_logs": "Recent Audit Logs",
+      "db_status": "Database Status",
+      "api_latency": "API Latency",
+      "uptime": "Uptime",
+      "mem_usage": "Memory Usage",
+      "avg_resp": "Average response time",
+      "ai_convs": "Active AI conversations",
+      "stats_trend": "+20.1% from last month"
+    },
+    "messages_tab": {
+      "search": "Search messages...",
+      "delete_selected": "Delete Selected",
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "date": "Date",
+      "actions": "Actions",
+      "no_messages": "No messages found."
+    },
+    "projects_tab": {
+      "title": "Title",
+      "featured": "Featured",
+      "status": "Status",
+      "actions": "Actions",
+      "published": "Published",
+      "draft": "Draft",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "blog_tab": {
+      "title": "Title",
+      "author": "Author",
+      "status": "Status",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "settings_tab": {
+      "title": "Dashboard Settings",
+      "sec_security": "Security",
+      "sec_seo": "SEO Configuration",
+      "sec_ai": "AI Service Status",
+      "change_pwd": "Change Admin Password",
+      "test_ai": "Test AI Connection",
+      "save_seo": "Save SEO Settings"
+    },
+    "skills_tab": {
+      "name": "Skill Name",
+      "category": "Category",
+      "proficiency": "Proficiency",
+      "actions": "Actions"
+    },
+    "testimonials_tab": {
+      "client": "Client Name",
+      "role": "Role",
+      "content": "Content",
+      "actions": "Actions"
+    }
+  }
+}

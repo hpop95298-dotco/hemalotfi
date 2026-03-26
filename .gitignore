@@ -4,3 +4,13 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+.env
+uploads
+.replit
+.expo
+.cache
+.npm
+.local/
+.config/
+*replit*
+*.bin

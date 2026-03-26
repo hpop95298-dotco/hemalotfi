@@ -11,6 +11,7 @@ export default function ParticleBackground() {
   return (
     <Particles
       id="tsparticles"
+      // @ts-ignore
       init={particlesInit}
       className="absolute inset-0 -z-10"
       options={{

@@ -20,7 +20,7 @@ export default function Home() {
       </main>
       
       <footer className="py-8 bg-black border-t border-white/10 text-center text-gray-500 font-body text-sm">
-        <p>&copy; {new Date().getFullYear()} Ibrahim Lotfi. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Ibrahim lotfi. All rights reserved.</p>
         <p className="mt-2">Designed with Future Tech.</p>
       </footer>
     </div>

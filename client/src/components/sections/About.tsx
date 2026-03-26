@@ -1,7 +1,19 @@
 import { motion } from "framer-motion";
-import avatar from "@/assets/avatar-placeholder.png";
+import avatar from "@/assets/hema.png";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 
 export default function About() {
+  const { t, i18n } = useTranslation();
+  
+  const { data: stats } = useQuery<{ visits: number; projects: number }>({
+    queryKey: ["/api/stats"],
+  });
+
+  const experienceYears = new Date().getFullYear() - 2022;
+  const projectDisplay = (stats?.projects || 0) > 10 ? `${stats?.projects}+` : "10+";
+  const visitDisplay = stats?.visits ? (stats.visits > 1000 ? `${(stats.visits / 1000).toFixed(1)}k+` : `${stats.visits}+`) : "500+";
+
   return (
     <section id="about" className="py-24 bg-background relative overflow-hidden">
       {/* Decorative Line */}
@@ -29,28 +41,32 @@ export default function About() {
           {/* Content */}
           <div className="w-full md:w-1/2" data-aos="fade-left">
             <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">
-              About <span className="text-primary">Me</span>
+              {t("about.title")} <span className="text-primary">{t("about.me")}</span>
             </h2>
-            <div className="space-y-6 text-gray-400 font-body text-lg leading-relaxed glass-card p-8 rounded-2xl border-l-4 border-l-primary">
+            <div className="space-y-6 text-muted-foreground font-body text-lg leading-relaxed glass-card p-8 rounded-2xl border-l-4 border-l-primary/50">
               <p>
-                I am a visionary Computer Science student with a passion for <strong className="text-white">Artificial Intelligence</strong> and <strong className="text-white">High-End Web Development</strong>.
+                {t("about.desc_1")}
               </p>
               <p>
-                My work bridges the gap between raw data and immersive user experiences. I don't just write code; I architect digital ecosystems that feel alive, responsive, and futuristic.
+                {t("about.desc_2")}
               </p>
               
-              <div className="pt-4 flex gap-8">
+              <div className="pt-4 grid grid-cols-2 lg:grid-cols-4 gap-8">
                 <div>
-                  <h3 className="text-3xl font-display font-bold text-white">03+</h3>
-                  <p className="text-sm uppercase tracking-wider text-gray-500">Years Exp</p>
+                  <h3 className="text-3xl font-display font-bold text-foreground">{experienceYears}+</h3>
+                  <p className="text-sm uppercase tracking-wider text-muted-foreground">{t("about.stats.years")}</p>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-display font-bold text-white">15+</h3>
-                  <p className="text-sm uppercase tracking-wider text-gray-500">Projects</p>
+                  <h3 className="text-3xl font-display font-bold text-foreground">{projectDisplay}</h3>
+                  <p className="text-sm uppercase tracking-wider text-muted-foreground">{t("about.stats.projects")}</p>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-display font-bold text-white">100%</h3>
-                  <p className="text-sm uppercase tracking-wider text-gray-500">Dedication</p>
+                  <h3 className="text-3xl font-display font-bold text-foreground">{visitDisplay}</h3>
+                  <p className="text-sm uppercase tracking-wider text-muted-foreground">{t("about.stats.visitors")}</p>
+                </div>
+                <div>
+                  <h3 className="text-3xl font-display font-bold text-foreground">100%</h3>
+                  <p className="text-sm uppercase tracking-wider text-muted-foreground">{t("about.stats.dedication")}</p>
                 </div>
               </div>
             </div>

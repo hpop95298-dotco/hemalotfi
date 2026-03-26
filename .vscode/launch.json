@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome - AI Lumina Local",
+            "url": "http://ibrahim.lotfi-protfile.local:5001",
+            "webRoot": "${workspaceFolder}/client"
+        }
+    ]
+}
