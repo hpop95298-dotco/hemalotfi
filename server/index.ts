@@ -14,11 +14,16 @@ import { rateLimit } from "express-rate-limit";
 // =========================
 // 🛡️ CRITICAL SECURITY CHECK
 // =========================
-const checkSecurityEnv = () => {
+export const checkSecurityEnv = () => {
   const missing = ['JWT_SECRET', 'ENCRYPTION_KEY', 'ADMIN_USERNAME', 'ADMIN_PASSWORD', 'AUDIT_LOG_PASSWORD'].filter(k => !process.env[k]);
   if (missing.length > 0) {
-    console.error(`\n[FATAL ERROR] Missing mandatory security environment variables: ${missing.join(', ')}`);
-    if (process.env.NODE_ENV === 'production') process.exit(1);
+    const msg = `[FATAL] Missing mandatory security environment variables: ${missing.join(', ')}`;
+    console.error(`\n${msg}`);
+    // Do not exit in serverless/Vercel environments, let the setupApp handle/log it
+    if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
+       process.exit(1);
+    }
+    return { ok: false, message: msg };
   } else {
     const adminPass = process.env.ADMIN_PASSWORD!;
     if (!adminPass.startsWith("$2b$") && !adminPass.startsWith("$2a$")) {
@@ -26,9 +31,13 @@ const checkSecurityEnv = () => {
     }
     const pw = String(process.env.AUDIT_LOG_PASSWORD || "");
     console.log(`[SECURITY] Audit Vault Key Loaded: ${pw.substring(0, 2)}... (Length: ${pw.length})`);
+    return { ok: true };
   }
 };
-checkSecurityEnv();
+// On Vercel, we call this inside setupApp instead of at top-level
+if (!process.env.VERCEL) {
+  checkSecurityEnv();
+}
 
 const app = express();
 app.use(
@@ -150,6 +159,14 @@ app.use((req, res, next) => {
 });
 
 export const setupApp = async () => {
+  // 🛡️ Security Check (Mandatory for Vercel to report missing ENV)
+  if (process.env.VERCEL) {
+    const security = checkSecurityEnv();
+    if (!security.ok) {
+      throw new Error(security.message);
+    }
+  }
+
   try {
     log("Verifying database schema...", "db");
     await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_two_factor_enabled BOOLEAN DEFAULT FALSE`);
