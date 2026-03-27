@@ -13,7 +13,7 @@ import path from "path";
 import fs from "fs";
 import bcrypt from "bcryptjs";
 import { db } from "./db";
-import { visitorLogs } from "@shared/schema";
+import { visitorLogs } from "../shared/schema";
 import { sql } from "drizzle-orm";
 // Lazy-load JSDOM and DOMPurify for serverless performance
 let DOMPurify: any;

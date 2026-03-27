@@ -2,7 +2,7 @@ import { db } from "./db";
 import {
   users, projects, messages, chatSessions, chatMessages, posts,
   skills, testimonials, seoSettings, visitorLogs, guestbook, auditLogs
-} from "@shared/schema";
+} from "../shared/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import crypto from "crypto";
 

@@ -3,6 +3,11 @@ import app, { setupApp } from "../server/index";
 let initialized = false;
 
 export default async (req: any, res: any) => {
+  if (!process.env.DATABASE_URL) {
+    console.error("FATAL: DATABASE_URL is not defined in environment variables");
+    return res.status(500).json({ error: "Environment Configuration Error", message: "DATABASE_URL is missing" });
+  }
+
   try {
     // Diagnostic route
     if (req.url === "/api/test-direct") {
