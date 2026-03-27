@@ -1,42 +1,65 @@
-import app, { setupApp } from "../server/index";
-
 let initialized = false;
+let serverApp: any;
+let setupAppFn: any;
 
 export default async (req: any, res: any) => {
-  if (!process.env.DATABASE_URL) {
-    console.error("FATAL: DATABASE_URL is not defined in environment variables");
-    return res.status(500).json({ error: "Environment Configuration Error", message: "DATABASE_URL is missing" });
+  // 1. Immediate Barebones Diagnostic
+  if (req.url === "/api/health-check") {
+    return res.status(200).json({ status: "ok", message: "Vercel function is running" });
   }
 
   try {
-    // Diagnostic route
+    // 2. Environment Verification
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl) {
+      return res.status(500).json({ 
+        error: "CONFIG_ERROR", 
+        message: "DATABASE_URL is missing in environment variables" 
+      });
+    }
+
+    // 3. Diagnostic Route
     if (req.url === "/api/test-direct") {
       return res.status(200).json({ 
         ok: true, 
-        message: "Vercel function is reached correctly", 
-        url: req.url,
-        env: {
+        message: "Vercel function diagnostic", 
+        env_check: {
           DATABASE_URL: !!process.env.DATABASE_URL,
           JWT_SECRET: !!process.env.JWT_SECRET,
+          RESEND_API_KEY: !!process.env.RESEND_API_KEY,
           NODE_ENV: process.env.NODE_ENV
         }
       });
     }
 
+    // 4. Dynamic Server Loading (to catch boot errors)
     if (!initialized) {
       try {
-        await setupApp();
+        console.log("[BOOT] Loading server module...");
+        const serverModule = await import("../server/index");
+        serverApp = serverModule.default;
+        setupAppFn = serverModule.setupApp;
+        
+        console.log("[BOOT] Running setupApp...");
+        await setupAppFn();
         initialized = true;
-      } catch (e: any) {
-        console.error("INITIALIZATION_FAILED:", e);
-        return res.status(500).json({ error: "Initialization failed", message: e.message, stack: e.stack });
+        console.log("[BOOT] Server initialized successfully");
+      } catch (bootError: any) {
+        console.error("SERVER_BOOT_CRASH:", bootError);
+        return res.status(500).json({ 
+          error: "SERVER_BOOT_CRASH", 
+          message: bootError.message, 
+          stack: bootError.stack,
+          hint: "This usually happens due to a top-level error in server/index.ts or its dependencies."
+        });
       }
     }
-    return app(req, res);
+
+    return serverApp(req, res);
   } catch (err: any) {
-    console.error("FATAL_HANDLER_ERROR:", err);
+    console.error("UNHANDLED_HANDLER_ERROR:", err);
     return res.status(500).json({ 
-      error: "FATAL_HANDLER_ERROR", 
+      error: "UNHANDLED_HANDLER_ERROR", 
       message: err.message, 
       stack: err.stack 
     });
