@@ -11,31 +11,39 @@ import nodemailer from "nodemailer";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import bcrypt from "bcrypt";
-import geoip from "geoip-lite";
+import bcrypt from "bcryptjs";
 import { db } from "./db";
 import { visitorLogs } from "@shared/schema";
 import { sql } from "drizzle-orm";
-import { JSDOM } from "jsdom";
-import createDOMPurify from "dompurify";
-
-const window = new JSDOM("").window;
-const DOMPurify = createDOMPurify(window);
+// Lazy-load JSDOM and DOMPurify for serverless performance
+let DOMPurify: any;
+async function getPurifier() {
+  if (DOMPurify) return DOMPurify;
+  const { JSDOM } = await import("jsdom");
+  const createDOMPurify = (await import("dompurify")).default;
+  const window = new JSDOM("").window;
+  DOMPurify = createDOMPurify(window as any);
+  return DOMPurify;
+}
 
 // Helper for sanitizing inputs
-const sanitize = (text: string) => DOMPurify.sanitize(text);
+const sanitize = async (text: string) => {
+  const purifier = await getPurifier();
+  return purifier.sanitize(text);
+};
 
-
-const sanitizeFields = (obj: any): any => {
+const sanitizeFields = async (obj: any): Promise<any> => {
   if (!obj || typeof obj !== 'object') return obj;
-  if (Array.isArray(obj)) return obj.map(v => sanitizeFields(v));
+  if (Array.isArray(obj)) {
+    return Promise.all(obj.map(v => sanitizeFields(v)));
+  }
   
   const sanitized: any = {};
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
-      sanitized[key] = sanitize(value);
+      sanitized[key] = await sanitize(value);
     } else if (typeof value === 'object') {
-      sanitized[key] = sanitizeFields(value);
+      sanitized[key] = await sanitizeFields(value);
     } else {
       sanitized[key] = value;
     }
@@ -111,7 +119,7 @@ const auditLogger = (action: string, entityType: string) => {
               method: req.method,
               path: req.path,
               // Strictly sanitize all body fields for audit logs
-              body: sanitizeFields(req.body)
+              body: await sanitizeFields(req.body)
             }),
             ipAddress: (req.headers['x-forwarded-for'] as string || req.ip || "unknown").split(',')[0].trim(),
             userAgent: req.get("User-Agent") || "unknown",
@@ -192,6 +200,7 @@ export async function registerRoutes(
         const ip = (req.headers['x-forwarded-for'] as string || req.ip || "1.1.1.1").split(',')[0].trim();
         let geo = null;
         try {
+          const geoip = await import("geoip-lite");
           geo = geoip.lookup(ip);
         } catch (e) {
           console.warn("GEOIP_LOOKUP_FAILED:", e);
@@ -461,7 +470,7 @@ export async function registerRoutes(
   app.patch("/api/projects/:id", authenticateToken, validateUUID, auditLogger("UPDATE", "projects"), async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const projectData = sanitizeFields(req.body);
+      const projectData = await sanitizeFields(req.body);
       const project = await storage.updateProject(id, projectData);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
@@ -505,9 +514,9 @@ export async function registerRoutes(
       }
 
       await storage.createMessage({
-        name: sanitize(name),
-        email: sanitize(email),
-        message: sanitize(message),
+        name: await sanitize(name),
+        email: await sanitize(email),
+        message: await sanitize(message),
         isRead: false,
       });
 
@@ -681,8 +690,8 @@ export async function registerRoutes(
       }
 
       const entry = await storage.createGuestbookEntry({ 
-        name: sanitize(name), 
-        message: sanitize(message), 
+        name: await sanitize(name), 
+        message: await sanitize(message), 
         aiReply: aiReply // AI response is safe
       });
       return res.json(entry);
@@ -719,7 +728,7 @@ export async function registerRoutes(
       await storage.addChatMessage({
         sessionId,
         sender: "user",
-        content: sanitize(content),
+        content: await sanitize(content),
       });
 
       // --- AI Integration ---
@@ -905,7 +914,7 @@ export async function registerRoutes(
       const message = await storage.addChatMessage({
         sessionId: sessionId as string,
         sender: "admin",
-        content: sanitize(content),
+        content: await sanitize(content),
       });
 
       return res.json(message);
@@ -1079,10 +1088,10 @@ export async function registerRoutes(
 
       const postData = {
         ...req.body,
-        title: sanitize(title),
-        slug: sanitize(slug),
-        content: sanitize(content),
-        summary: req.body.summary ? sanitize(req.body.summary) : req.body.summary,
+        title: await sanitize(title),
+        slug: await sanitize(slug),
+        content: await sanitize(content),
+        summary: req.body.summary ? await sanitize(req.body.summary) : req.body.summary,
       };
 
       const post = await storage.createPost(postData);
@@ -1098,7 +1107,7 @@ export async function registerRoutes(
 
   app.patch("/api/posts/:id", authenticateToken, validateUUID, auditLogger("UPDATE", "posts"), async (req: Request, res: Response) => {
     try {
-      const sanitizedBody = sanitizeFields(req.body);
+      const sanitizedBody = await sanitizeFields(req.body);
       const updated = await storage.updatePost(req.params.id as string, sanitizedBody);
       if (!updated) return res.status(404).json({ message: "Post not found" });
       return res.json(updated);
@@ -1267,7 +1276,7 @@ export async function registerRoutes(
   app.patch("/api/skills/:id", authenticateToken, validateUUID, auditLogger("UPDATE", "skills"), async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const sanitizedBody = sanitizeFields(req.body);
+      const sanitizedBody = await sanitizeFields(req.body);
       const skill = await storage.updateSkill(id, sanitizedBody);
       return res.json(skill);
     } catch (error) {
