@@ -445,16 +445,12 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// 🛡️ Data Encryption Helpers (AES-256-GCM)
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
+const ENCRYPTION_KEY_RAW = process.env.ENCRYPTION_KEY || "fallback-secret-key-at-least-32-chars-long";
+// Always hash the key to exactly 32 bytes for AES-256-GCM
+const ENCRYPTION_KEY = crypto.createHash('sha256').update(ENCRYPTION_KEY_RAW).digest();
 
-if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length < 32) {
-  const msg = "[FATAL] ENCRYPTION_KEY must be a 32-character string for AES-256-GCM.";
-  console.error(msg);
-  // Do not throw at top level in Vercel, let handlers catch or log
-  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
-    throw new Error(msg);
-  }
+if (!process.env.ENCRYPTION_KEY || process.env.ENCRYPTION_KEY.length < 32) {
+  console.warn("[SECURITY] ENCRYPTION_KEY is missing or too short. Using hashed fallback/short key.");
 }
 
 const IV_LENGTH = 16;
@@ -463,7 +459,7 @@ export function encrypt(text: string): string {
   if (!text) return text;
   try {
     const iv = crypto.randomBytes(IV_LENGTH);
-    const cipher = crypto.createCipheriv("aes-256-gcm", Buffer.from(ENCRYPTION_KEY!.substring(0, 32)), iv);
+    const cipher = crypto.createCipheriv("aes-256-gcm", ENCRYPTION_KEY, iv);
     let encrypted = cipher.update(text, "utf8", "hex");
     encrypted += cipher.final("hex");
     const authTag = cipher.getAuthTag().toString("hex");
@@ -478,7 +474,7 @@ export function decrypt(text: string): string {
     const iv = Buffer.from(parts[1], "hex");
     const authTag = Buffer.from(parts[2], "hex");
     const encryptedText = parts[3];
-    const decipher = crypto.createDecipheriv("aes-256-gcm", Buffer.from(ENCRYPTION_KEY!.substring(0, 32)), iv);
+    const decipher = crypto.createDecipheriv("aes-256-gcm", ENCRYPTION_KEY, iv);
     decipher.setAuthTag(authTag);
     let decrypted = decipher.update(encryptedText, "hex", "utf8");
     decrypted += decipher.final("utf8");

@@ -190,7 +190,12 @@ export async function registerRoutes(
       !req.path.includes("/static")) {
       try {
         const ip = (req.headers['x-forwarded-for'] as string || req.ip || "1.1.1.1").split(',')[0].trim();
-        const geo = geoip.lookup(ip);
+        let geo = null;
+        try {
+          geo = geoip.lookup(ip);
+        } catch (e) {
+          console.warn("GEOIP_LOOKUP_FAILED:", e);
+        }
         
         await storage.logVisitor({
           path: req.path,

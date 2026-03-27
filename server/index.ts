@@ -145,7 +145,7 @@ export const setupApp = async () => {
     }
   }
 
-  try {
+    /* REDUNDANT ON VERCEL: Handled by drizzle-kit push
     log("Verifying database schema...", "db");
     await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_two_factor_enabled BOOLEAN DEFAULT FALSE`);
     await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS two_factor_secret TEXT`);
@@ -154,9 +154,7 @@ export const setupApp = async () => {
     await db.execute(sql`ALTER TABLE visitor_logs ADD COLUMN IF NOT EXISTS city TEXT`);
     await db.execute(sql`ALTER TABLE visitor_logs ADD COLUMN IF NOT EXISTS country TEXT`);
     log("✅ Database schema updated.", "db");
-  } catch (e) {
-    log("⚠️ Database sync skipped/failed: " + e, "db");
-  }
+    */
 
   await registerRoutes(httpServer, app);
 
@@ -176,9 +174,9 @@ export const setupApp = async () => {
     return res.status(status).json({ message });
   });
 
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === "production" && !process.env.VERCEL) {
     serveStatic(app);
-  } else {
+  } else if (process.env.NODE_ENV !== "production") {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }
