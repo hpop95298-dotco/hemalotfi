@@ -3,28 +3,15 @@
   "rewrites": [
     {
       "source": "/api/test-direct",
-      "destination": "/api/index"
+      "destination": "/api"
     },
     {
       "source": "/api/(.*)",
-      "destination": "/api/index"
+      "destination": "/api"
     },
     {
       "source": "/(.*)",
       "destination": "/index.html"
-    }
-  ],
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist/public"
-      }
-    },
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node"
     }
   ]
 }
