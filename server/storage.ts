@@ -451,7 +451,8 @@ const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length < 32) {
   const msg = "[FATAL] ENCRYPTION_KEY must be a 32-character string for AES-256-GCM.";
   console.error(msg);
-  if (process.env.NODE_ENV === 'production') {
+  // Do not throw at top level in Vercel, let handlers catch or log
+  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
     throw new Error(msg);
   }
 }

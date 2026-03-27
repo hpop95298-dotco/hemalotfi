@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import { authenticateToken } from "./auth";
 import { storage, verifyTOTP, encrypt, decrypt } from "./storage";
-import { loginLimiter, contactLimiter } from "./index";
+import { log, loginLimiter, contactLimiter } from "./middleware";
 import { Resend } from "resend";
 import nodemailer from "nodemailer";
 import multer from "multer";
@@ -116,8 +116,6 @@ const auditLogger = (action: string, entityType: string) => {
             ipAddress: (req.headers['x-forwarded-for'] as string || req.ip || "unknown").split(',')[0].trim(),
             userAgent: req.get("User-Agent") || "unknown",
           });
-          // Use structured log instead of console.log
-          const { log } = await import("./index");
           log(`${action} on ${entityType} logged successfully.`, "audit", "INFO");
         } catch (e) {
           console.error("[AUDIT LOG ERROR] Failed to create log entry:", e);
@@ -166,7 +164,6 @@ const checkIPBan = (req: Request, res: Response, next: any) => {
 
 const checkHoneypot = (req: Request, res: Response, next: Function) => {
   if (req.body.website_url_honey) {
-    const { log } = require("./index");
     log(`Honeypot field filled by ${req.ip}`, "bot-detection", "SECURITY");
     return res.status(403).json({ message: "Bot detected" });
   }
