@@ -1,6 +1,6 @@
+import serverApp, { setupApp } from "../server/index";
+
 let initialized = false;
-let serverApp: any;
-let setupAppFn: any;
 
 export default async (req: any, res: any) => {
   // 1. Immediate Barebones Diagnostic
@@ -22,7 +22,7 @@ export default async (req: any, res: any) => {
     if (req.url === "/api/test-direct") {
       return res.status(200).json({ 
         ok: true, 
-        message: "Vercel function diagnostic", 
+        message: "Vercel function diagnostic (Static Import)", 
         env_check: {
           DATABASE_URL: !!process.env.DATABASE_URL,
           JWT_SECRET: !!process.env.JWT_SECRET,
@@ -32,25 +32,17 @@ export default async (req: any, res: any) => {
       });
     }
 
-    // 4. Dynamic Server Loading (to catch boot errors)
+    // 4. Server Initialization
     if (!initialized) {
       try {
-        console.log("[BOOT] Loading server module...");
-        const serverModule = await import("../server/index");
-        serverApp = serverModule.default;
-        setupAppFn = serverModule.setupApp;
-        
-        console.log("[BOOT] Running setupApp...");
-        await setupAppFn();
+        await setupApp();
         initialized = true;
-        console.log("[BOOT] Server initialized successfully");
       } catch (bootError: any) {
         console.error("SERVER_BOOT_CRASH:", bootError);
         return res.status(500).json({ 
           error: "SERVER_BOOT_CRASH", 
           message: bootError.message, 
-          stack: bootError.stack,
-          hint: "This usually happens due to a top-level error in server/index.ts or its dependencies."
+          stack: bootError.stack
         });
       }
     }
