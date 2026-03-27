@@ -149,7 +149,7 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
+export const setupApp = async () => {
   try {
     log("Verifying database schema...", "db");
     await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_two_factor_enabled BOOLEAN DEFAULT FALSE`);
@@ -169,7 +169,6 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = process.env.NODE_ENV === "production" ? "Internal Server Error" : (err.message || "Internal Server Error");
 
-    // Detailed error only in console, NEVER to client in production
     log(`ERROR: ${err.message}`, "error-handler", "ERROR");
     if (process.env.NODE_ENV !== "production") {
       console.error(err);
@@ -188,18 +187,24 @@ app.use((req, res, next) => {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }
+};
 
-  const port = parseInt(process.env.PORT || "5001", 10);
-  httpServer.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`serving on port ${port}`);
-    },
-  );
-})();
+// Only run if not on Vercel
+if (!process.env.VERCEL && !process.env.NOW_REGION) {
+  (async () => {
+    await setupApp();
+    const port = parseInt(process.env.PORT || "5001", 10);
+    httpServer.listen(
+      {
+        port,
+        host: "0.0.0.0",
+        reusePort: true,
+      },
+      () => {
+        log(`serving on port ${port}`);
+      },
+    );
+  })();
+}
 
 export default app;
