@@ -2,12 +2,16 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/test-direct",
+      "destination": "/api/index"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/index"
     },
     {
       "source": "/(.*)",
-      "destination": "/"
+      "destination": "/index.html"
     }
   ],
   "builds": [
