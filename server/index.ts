@@ -79,7 +79,7 @@ export const contactLimiter = rateLimit({
   message: { message: "Message limit reached. Please wait an hour before sending another." },
 });
 
-app.use(cors({ origin: true, credentials: true })); 
+app.use(cors({ origin: true, credentials: true }));
 const httpServer = createServer(app);
 
 declare module "http" {
@@ -115,7 +115,7 @@ export function log(message: string, source = "express", level: "INFO" | "WARN" 
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  
+
   // Security: Prevent logging sensitive headers
   const sanitizedHeaders = { ...req.headers };
   delete sanitizedHeaders.authorization;
@@ -126,12 +126,12 @@ app.use((req, res, next) => {
       const duration = Date.now() - start;
       const status = res.statusCode;
       let level: "INFO" | "WARN" | "ERROR" | "SECURITY" = "INFO";
-      
+
       if (status >= 500) level = "ERROR";
       else if (status >= 400) level = "SECURITY"; // Log 4xx as security events (potential probes)
 
       let logLine = `${req.method} ${path} ${status} in ${duration}ms`;
-      
+
       // Anomaly detection for multiple 4xx
       if (status === 401 || status === 403) {
         logLine += ` [ANOMALY_DETECTED]`;
@@ -141,7 +141,7 @@ app.use((req, res, next) => {
       if (process.env.NODE_ENV !== "production" && !path.includes("/api/login")) {
         // Optional: log minimal info in dev
       }
-      
+
       log(logLine, "express", level);
     }
   });
@@ -201,3 +201,5 @@ app.use((req, res, next) => {
     },
   );
 })();
+
+export default app;
