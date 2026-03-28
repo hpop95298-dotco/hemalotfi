@@ -62,11 +62,11 @@ export default function Skills() {
       });
   }, []);
 
-  const groupedSkills = skills.reduce((acc: any, skill) => {
+  const groupedSkills = Array.isArray(skills) ? skills.reduce((acc: any, skill) => {
     if (!acc[skill.category]) acc[skill.category] = [];
     acc[skill.category].push(skill);
     return acc;
-  }, {});
+  }, {}) : {};
 
   const categories = Object.keys(groupedSkills);
 

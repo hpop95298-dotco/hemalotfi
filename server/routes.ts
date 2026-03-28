@@ -187,6 +187,24 @@ export async function registerRoutes(
 
   app.use("/api", limiter);
 
+  // --- Diagnostic Routes (for local parity with api/index.ts) ---
+  app.get("/api/health-check", (_req, res) => {
+    res.json({ status: "ok", message: "Local server is running" });
+  });
+
+  app.get("/api/test-direct", (_req, res) => {
+    res.json({ 
+      ok: true, 
+      message: "Local server diagnostic", 
+      env_check: {
+        DATABASE_URL: !!process.env.DATABASE_URL,
+        JWT_SECRET: !!process.env.JWT_SECRET,
+        RESEND_API_KEY: !!process.env.RESEND_API_KEY,
+        NODE_ENV: process.env.NODE_ENV
+      }
+    });
+  });
+
   // =========================
   // 📉 VISITOR TRACKING
   // =========================
@@ -200,7 +218,7 @@ export async function registerRoutes(
         const ip = (req.headers['x-forwarded-for'] as string || req.ip || "1.1.1.1").split(',')[0].trim();
         let geo = null;
         try {
-          const geoip = await import("geoip-lite");
+          const { default: geoip } = await import("geoip-lite");
           geo = geoip.lookup(ip);
         } catch (e) {
           console.warn("GEOIP_LOOKUP_FAILED:", e);

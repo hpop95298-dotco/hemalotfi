@@ -46,11 +46,34 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net", "https://*.googleapis.com"],
+        scriptSrc: [
+          "'self'", 
+          "'unsafe-inline'", 
+          "'unsafe-eval'", 
+          "https://cdn.jsdelivr.net", 
+          "https://*.googleapis.com",
+          "https://www.googletagmanager.com",
+          "https://*.google-analytics.com"
+        ],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
-        imgSrc: ["'self'", "data:", "https://images.unsplash.com", "https://*.google.com", "https://*.googleusercontent.com", "https://*.resend.com"],
-        connectSrc: ["'self'", "https://*.googleapis.com", "https://api.openai.com", "https://generativelanguage.googleapis.com", "https://*.resend.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: [
+          "'self'", 
+          "data:", 
+          "https://images.unsplash.com", 
+          "https://*.google.com", 
+          "https://*.googleusercontent.com", 
+          "https://*.resend.com",
+          "https://www.googletagmanager.com"
+        ],
+        connectSrc: [
+          "'self'", 
+          "https://*.googleapis.com", 
+          "https://api.openai.com", 
+          "https://generativelanguage.googleapis.com", 
+          "https://*.resend.com",
+          "https://*.google-analytics.com"
+        ],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
       },

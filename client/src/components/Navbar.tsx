@@ -70,11 +70,9 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-8">
           {navItems.map((item) => (
             item.href.startsWith("/") ? (
-              <Link key={item.name} href={item.href}>
-                <a className="font-body text-sm font-medium tracking-wide text-muted-foreground hover:text-primary transition-colors relative group">
+              <Link key={item.name} href={item.href} className="font-body text-sm font-medium tracking-wide text-muted-foreground hover:text-primary transition-colors relative group">
                   {item.name}
                   <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-primary transition-all duration-300 group-hover:w-full"></span>
-                </a>
               </Link>
             ) : (
               <a
@@ -107,10 +105,8 @@ export default function Navbar() {
           <div className="absolute top-full left-0 w-full bg-background/95 backdrop-blur-xl border-b border-border p-6 flex flex-col gap-4 md:hidden">
             {navItems.map((item) => (
               item.href.startsWith("/") ? (
-                <Link key={item.name} href={item.href} onClick={() => setIsOpen(false)}>
-                  <a className="text-lg font-body text-white hover:text-primary">
+                <Link key={item.name} href={item.href} onClick={() => setIsOpen(false)} className="text-lg font-body text-white hover:text-primary">
                     {item.name}
-                  </a>
                 </Link>
               ) : (
                 <a
