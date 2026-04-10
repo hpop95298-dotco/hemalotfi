@@ -466,10 +466,10 @@ export async function registerRoutes(
     try {
       const projectData = {
         ...req.body,
-        title: sanitize(req.body.title),
-        slug: sanitize(req.body.slug),
-        description: req.body.description ? sanitize(req.body.description) : req.body.description,
-        content: req.body.content ? sanitize(req.body.content) : req.body.content,
+        title: await sanitize(req.body.title),
+        slug: await sanitize(req.body.slug),
+        description: req.body.description ? await sanitize(req.body.description) : req.body.description,
+        content: req.body.content ? await sanitize(req.body.content) : req.body.content,
       };
       
       const project = await storage.createProject(projectData);
@@ -1279,8 +1279,8 @@ export async function registerRoutes(
 
       const skillData = {
         ...req.body,
-        name: sanitize(name),
-        category: sanitize(category),
+        name: await sanitize(name),
+        category: await sanitize(category),
       };
 
       const skill = await storage.createSkill(skillData);
@@ -1328,9 +1328,9 @@ export async function registerRoutes(
     try {
       const testimonialData = {
         ...req.body,
-        name: sanitize(req.body.name),
-        content: sanitize(req.body.content),
-        role: req.body.role ? sanitize(req.body.role) : req.body.role,
+        name: await sanitize(req.body.name),
+        content: await sanitize(req.body.content),
+        role: req.body.role ? await sanitize(req.body.role) : req.body.role,
       };
       const testimonial = await storage.createTestimonial(testimonialData);
       return res.json(testimonial);
@@ -1364,7 +1364,7 @@ export async function registerRoutes(
   app.post("/api/admin/seo", authenticateToken, auditLogger("UPDATE", "seo"), async (req: Request, res: Response) => {
     try {
       const { key, value } = req.body;
-      const sanitizedValue = typeof value === 'string' ? sanitize(value) : value;
+      const sanitizedValue = typeof value === 'string' ? await sanitize(value) : value;
       const setting = await storage.updateSEOSetting(key, sanitizedValue);
       return res.json(setting);
     } catch (error) {
