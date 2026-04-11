@@ -1,4 +1,4 @@
-import serverApp, { setupApp } from "./server/index";
+import serverApp, { setupApp } from "../server/index";
 
 let initialized = false;
 
