@@ -1,5 +1,8 @@
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const server = require("../dist/index.cjs");
+
 let initialized = false;
-let serverApp: any, setupApp: any;
 
 export default async (req: any, res: any) => {
   // 1. Immediate Barebones Diagnostic
@@ -8,12 +11,6 @@ export default async (req: any, res: any) => {
   }
 
   try {
-    // Lazy load the server app to catch initialization crashes
-    if (!serverApp) {
-      const server = await import("../server/index");
-      serverApp = server.default;
-      setupApp = server.setupApp;
-    }
     // 2. Environment Verification
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) {
@@ -40,7 +37,7 @@ export default async (req: any, res: any) => {
     // 4. Server Initialization
     if (!initialized) {
       try {
-        await setupApp();
+        await server.setupApp();
         initialized = true;
       } catch (bootError: any) {
         console.error("SERVER_BOOT_CRASH:", bootError);
@@ -52,7 +49,7 @@ export default async (req: any, res: any) => {
       }
     }
 
-    return serverApp(req, res);
+    return server.default(req, res);
   } catch (err: any) {
     console.error("UNHANDLED_HANDLER_ERROR:", err);
     return res.status(500).json({
