@@ -1,6 +1,5 @@
-import serverApp, { setupApp } from "../server/index";
-
 let initialized = false;
+let serverApp: any, setupApp: any;
 
 export default async (req: any, res: any) => {
   // 1. Immediate Barebones Diagnostic
@@ -9,20 +8,26 @@ export default async (req: any, res: any) => {
   }
 
   try {
+    // Lazy load the server app to catch initialization crashes
+    if (!serverApp) {
+      const server = await import("../server/index");
+      serverApp = server.default;
+      setupApp = server.setupApp;
+    }
     // 2. Environment Verification
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) {
-      return res.status(500).json({ 
-        error: "CONFIG_ERROR", 
-        message: "DATABASE_URL is missing in environment variables" 
+      return res.status(500).json({
+        error: "CONFIG_ERROR",
+        message: "DATABASE_URL is missing in environment variables"
       });
     }
 
     // 3. Diagnostic Route
     if (req.url === "/api/test-direct") {
-      return res.status(200).json({ 
-        ok: true, 
-        message: "Vercel function diagnostic (Static Import)", 
+      return res.status(200).json({
+        ok: true,
+        message: "Vercel function diagnostic (Static Import)",
         env_check: {
           DATABASE_URL: !!process.env.DATABASE_URL,
           JWT_SECRET: !!process.env.JWT_SECRET,
@@ -39,9 +44,9 @@ export default async (req: any, res: any) => {
         initialized = true;
       } catch (bootError: any) {
         console.error("SERVER_BOOT_CRASH:", bootError);
-        return res.status(500).json({ 
-          error: "SERVER_BOOT_CRASH", 
-          message: bootError.message, 
+        return res.status(500).json({
+          error: "SERVER_BOOT_CRASH",
+          message: bootError.message,
           stack: bootError.stack
         });
       }
@@ -50,10 +55,10 @@ export default async (req: any, res: any) => {
     return serverApp(req, res);
   } catch (err: any) {
     console.error("UNHANDLED_HANDLER_ERROR:", err);
-    return res.status(500).json({ 
-      error: "UNHANDLED_HANDLER_ERROR", 
-      message: err.message, 
-      stack: err.stack 
+    return res.status(500).json({
+      error: "UNHANDLED_HANDLER_ERROR",
+      message: err.message,
+      stack: err.stack
     });
   }
 };
