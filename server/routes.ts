@@ -15,21 +15,18 @@ import bcrypt from "bcryptjs";
 import { db } from "./db";
 import { visitorLogs } from "../shared/schema";
 import { sql } from "drizzle-orm";
-// Lazy-load JSDOM and DOMPurify for serverless performance
-let DOMPurify: any;
-async function getPurifier() {
-  if (DOMPurify) return DOMPurify;
-  const { JSDOM } = await import("jsdom");
-  const createDOMPurify = (await import("dompurify")).default;
-  const window = new JSDOM("").window;
-  DOMPurify = createDOMPurify(window as any);
-  return DOMPurify;
-}
+import sanitizeHtml from "sanitize-html";
 
 // Helper for sanitizing inputs
 const sanitize = async (text: string) => {
-  const purifier = await getPurifier();
-  return purifier.sanitize(text);
+  if (!text) return text;
+  return sanitizeHtml(text, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ]),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      img: [ 'src', 'alt' ]
+    }
+  });
 };
 
 const sanitizeFields = async (obj: any): Promise<any> => {
