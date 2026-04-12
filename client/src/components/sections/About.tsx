@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import avatar from "@/assets/hema.png";
+const avatar = "/profile.png";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 
