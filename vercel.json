@@ -6,10 +6,6 @@
       "destination": "/api/index"
     },
     {
-      "source": "/test-v1",
-      "destination": "/api/index"
-    },
-    {
       "source": "/(.*)",
       "destination": "/api/index"
     }
