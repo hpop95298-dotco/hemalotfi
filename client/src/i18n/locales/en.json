@@ -114,18 +114,18 @@
     "human_response": "Human Response"
   },
   "login": {
-    "title": "Admin Login",
-    "subtitle": "Enter your credentials to access dashboard",
-    "username": "Username",
-    "password": "Password",
-    "username_placeholder": "Enter username",
-    "password_placeholder": "Enter password",
+    "title": "Encrypted Access Portal",
+    "subtitle": "Verify identity protocols to access IBM",
+    "username": "Admin Identifier",
+    "password": "Encryption Key",
+    "username_placeholder": "Enter your identifier",
+    "password_placeholder": "Enter secret key",
     "show": "Show",
     "hide": "Hide",
     "remember": "Remember me",
-    "signin": "Login",
-    "signing_in": "Logging in...",
-    "error_required": "All fields are required"
+    "signin": "Initiate Session",
+    "signing_in": "Authenticating...",
+    "error_required": "All identity protocols required"
   },
   "seo": {
     "default_title": "Ibrahim Lotfi | AI & Web Developer",

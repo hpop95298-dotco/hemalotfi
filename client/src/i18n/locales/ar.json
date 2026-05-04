@@ -114,18 +114,18 @@
     "human_response": "رد بشري"
   },
   "login": {
-    "title": "دخول الإدارة",
-    "subtitle": "أدخل بياناتك للوصول إلى لوحة التحكم",
-    "username": "اسم المستخدم",
-    "password": "كلمة المرور",
-    "username_placeholder": "أدخل اسم المستخدم",
-    "password_placeholder": "أدخل كلمة المرور",
+    "title": "بوابة الولوج المشفرة",
+    "subtitle": "يرجى التحقق من بروتوكولات الهوية للوصول إلى IBM",
+    "username": "معرّف المسؤول",
+    "password": "مفتاح التشفير",
+    "username_placeholder": "أدخل المعرّف الخاص بك",
+    "password_placeholder": "أدخل المفتاح السري",
     "show": "إظهار",
     "hide": "إخفاء",
     "remember": "تذكرني",
-    "signin": "تسجيل الدخول",
-    "signing_in": "جاري الدخول...",
-    "error_required": "جميع الحقول مطلوبة"
+    "signin": "بدء جلسة العمل",
+    "signing_in": "جاري المصادقة...",
+    "error_required": "جميع بروتوكولات الهوية مطلوبة"
   },
   "seo": {
     "default_title": "إبراهيم لطفي | مطور ذكاء اصطناعي وويب",

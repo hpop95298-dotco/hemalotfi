@@ -28,10 +28,12 @@ export const checkSecurityEnv = () => {
   } else {
     const adminPass = process.env.ADMIN_PASSWORD!;
     if (!adminPass.startsWith("$2b$") && !adminPass.startsWith("$2a$")) {
-      console.warn("\n[SECURITY WARNING] ADMIN_PASSWORD is not a bcrypt hash. This is insecure for production.");
+      console.warn("\n[SECURITY WARNING] ADMIN_PASSWORD is not a bcrypt hash. This is insecure for production. Please hash it.");
     }
-    const pw = String(process.env.AUDIT_LOG_PASSWORD || "");
-    console.log(`[SECURITY] Audit Vault Key Loaded: ${pw.substring(0, 2)}... (Length: ${pw.length})`);
+    const auditPass = process.env.AUDIT_LOG_PASSWORD!;
+    if (!auditPass.startsWith("$2b$") && !auditPass.startsWith("$2a$")) {
+      console.warn("\n[SECURITY WARNING] AUDIT_LOG_PASSWORD is not a bcrypt hash. This is insecure for production.");
+    }
     return { ok: true };
   }
 };
@@ -86,21 +88,36 @@ app.use(
   })
 );
 
-app.set("trust proxy", 1); // For rate limiting behind a reverse proxy
+app.set("trust proxy", 1); 
 
-// 1️⃣ Global Rate Limiter: General DDoS prevention
+// Restrict CORS origins
+const allowedOrigins = [
+  "http://localhost:5173", 
+  "http://localhost:5001",
+  "https://ibrahim-portfolio.vercel.app" // Add your actual production domain here
+];
+
+app.use(cors({ 
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true 
+}));
+
+// 🛡️ Global Rate Limiter: General DDoS prevention
 const globalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 150, // Limit each IP to 150 requests per window
+  limit: 300, // Balanced limit for portfolio
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { message: "Too many requests from this IP, please try again later." },
 });
 app.use("/api", globalRateLimiter);
 
-// 2️⃣ Specialized Limiters moved to middleware.ts to break circular dependencies
-
-app.use(cors({ origin: true, credentials: true }));
 const httpServer = createServer(app);
 
 declare module "http" {
@@ -128,8 +145,8 @@ app.use((req, res, next) => {
 
   // Security: Prevent logging sensitive headers
   const sanitizedHeaders = { ...req.headers };
-  delete sanitizedHeaders.authorization;
-  delete sanitizedHeaders.cookie;
+  const sensitiveHeaders = ['authorization', 'cookie', 'x-api-key', 'set-cookie', 'proxy-authorization'];
+  sensitiveHeaders.forEach(h => delete sanitizedHeaders[h]);
 
   res.on("finish", () => {
     if (path.startsWith("/api")) {

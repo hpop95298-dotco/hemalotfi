@@ -43,8 +43,8 @@ export default async (req: any, res: any) => {
         console.error("SERVER_BOOT_CRASH:", bootError);
         return res.status(500).json({
           error: "SERVER_BOOT_CRASH",
-          message: bootError.message,
-          stack: bootError.stack
+          message: process.env.NODE_ENV === "production" ? "Internal Server Error" : bootError.message,
+          ...(process.env.NODE_ENV !== "production" && { stack: bootError.stack })
         });
       }
     }
@@ -54,8 +54,8 @@ export default async (req: any, res: any) => {
     console.error("UNHANDLED_HANDLER_ERROR:", err);
     return res.status(500).json({
       error: "UNHANDLED_HANDLER_ERROR",
-      message: err.message,
-      stack: err.stack
+      message: process.env.NODE_ENV === "production" ? "Internal Server Error" : err.message,
+      ...(process.env.NODE_ENV !== "production" && { stack: err.stack })
     });
   }
 };

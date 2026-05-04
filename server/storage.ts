@@ -5,6 +5,7 @@ import {
 } from "../shared/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import crypto from "crypto";
+import { authenticator } from 'otplib';
 
 import type {
   InsertUser, User, InsertProject, Project, InsertMessage, Message,
@@ -450,7 +451,7 @@ const ENCRYPTION_KEY_RAW = process.env.ENCRYPTION_KEY || "fallback-secret-key-at
 const ENCRYPTION_KEY = crypto.createHash('sha256').update(ENCRYPTION_KEY_RAW).digest();
 
 if (!process.env.ENCRYPTION_KEY || process.env.ENCRYPTION_KEY.length < 32) {
-  console.warn("[SECURITY] ENCRYPTION_KEY is missing or too short. Using hashed fallback/short key.");
+  console.warn("[SECURITY] ENCRYPTION_KEY is missing or too weak. Using hashed fallback/short key.");
 }
 
 const IV_LENGTH = 16;
@@ -482,45 +483,13 @@ export function decrypt(text: string): string {
   } catch (e) { return text; }
 }
 
+
 export function verifyTOTP(token: string, secret: string): boolean {
   try {
-    const interval = Math.floor(Date.now() / 30000);
-    for (let i = -1; i <= 1; i++) {
-      if (generateTOTP(secret, interval + i) === token) return true;
-    }
-    return false;
-  } catch (e) { return false; }
-}
-
-function generateTOTP(secret: string, counter: number): string {
-  try {
-    const BufferFromBase32 = (str: string) => {
-      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-      let bits = 0; let value = 0; let output = [];
-      for (const char of str.toUpperCase().replace(/=+$/, '')) {
-        let idx = alphabet.indexOf(char);
-        if (idx === -1) continue;
-        value = (value << 5) | idx;
-        bits += 5;
-        if (bits >= 8) {
-          output.push((value >>> (bits - 8)) & 255);
-          bits -= 8;
-        }
-      }
-      return Buffer.from(output);
-    };
-    const key = BufferFromBase32(secret);
-    let countBuf = Buffer.alloc(8);
-    let tempCounter = BigInt(counter);
-    for (let i = 0; i < 8; i++) {
-      countBuf[7 - i] = Number(tempCounter & BigInt(255));
-      tempCounter >>= BigInt(8);
-    }
-    const hmac = crypto.createHmac('sha1', key).update(countBuf).digest();
-    const offset = hmac[hmac.length - 1] & 0xf;
-    let code = ((hmac[offset] & 127) << 24) | ((hmac[offset + 1] & 255) << 16) | ((hmac[offset + 2] & 255) << 8) | (hmac[offset + 3] & 255);
-    return (code % 1000000).toString().padStart(6, '0');
-  } catch (e) { return ""; }
+    return authenticator.verify({ token, secret });
+  } catch (e) { 
+    return false; 
+  }
 }
 
 export const storage = new DatabaseStorage();
