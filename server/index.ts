@@ -94,7 +94,9 @@ app.set("trust proxy", 1);
 const allowedOrigins = [
   "http://localhost:5173", 
   "http://localhost:5001",
-  "https://ibrahim-portfolio.vercel.app" // Add your actual production domain here
+  "https://ibrahim-portfolio.vercel.app",
+  "https://www.ibrahimlotfi.online",
+  "https://ibrahimlotfi.online"
 ];
 
 app.use(cors({ 
