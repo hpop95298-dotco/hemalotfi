@@ -212,22 +212,15 @@ export async function registerRoutes(
       !req.path.includes("/static")) {
       try {
         const ip = req.ip || "1.1.1.1";
-        let geo = null;
-        try {
-          const { default: geoip } = await import("geoip-lite");
-          geo = geoip.lookup(ip);
-        } catch (e) {
-          console.warn("GEOIP_LOOKUP_FAILED:", e);
-        }
         
         await storage.logVisitor({
           path: req.path,
           ip: ip,
           userAgent: req.get("User-Agent") || "unknown",
-          latitude: geo ? String(geo.ll[0]) : null,
-          longitude: geo ? String(geo.ll[1]) : null,
-          city: geo ? geo.city : null,
-          country: geo ? geo.country : null,
+          latitude: null,
+          longitude: null,
+          city: null,
+          country: null,
         });
       } catch (e) {
         console.error("VISITOR LOG ERROR:", e);
