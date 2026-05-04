@@ -21,7 +21,7 @@ export default function Login() {
   useEffect(() => {
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
     if (token) {
-      setLocation("/ibrahim-workspace-portal");
+      setLocation("/ibrahim-workspace-Admin");
     }
   }, []);
 
@@ -72,7 +72,7 @@ export default function Login() {
         sessionStorage.setItem("token", data.token);
       }
 
-      setLocation("/ibrahim-workspace-portal");
+      setLocation("/ibrahim-workspace-Admin");
     } catch (err: any) {
       setError(err.message);
     } finally {

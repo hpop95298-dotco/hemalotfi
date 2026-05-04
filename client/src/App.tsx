@@ -21,7 +21,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import SidebarTransition from "./components/effects/SidebarTransition";
 
-const ADMIN_SECRET_PATH = "/ibrahim-workspace-portal"; // Obfuscated path
+const ADMIN_SECRET_PATH = "/ibrahim-workspace-Admin"; // Updated path
 
 function ProtectedRoute({ component: Component }: any) {
   const [loading, setLoading] = useState(true);
