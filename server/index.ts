@@ -114,10 +114,14 @@ app.use((req, res, next) => {
     }
 
     const PORT = 5000;
-    server.listen(PORT, "0.0.0.0", () => {
-      log(`serving on port ${PORT}`);
-    });
+    if (process.env.NODE_ENV !== "production") {
+      server.listen(PORT, "0.0.0.0", () => {
+        log(`serving on port ${PORT}`);
+      });
+    }
   } catch (error) {
     console.error("CRITICAL BOOT ERROR:", error);
   }
 })();
+
+export default app;

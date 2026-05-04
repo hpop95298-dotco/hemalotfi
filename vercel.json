@@ -1,31 +1,17 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "dist/index.cjs",
-      "use": "@vercel/node"
+      "source": "/api/(.*)",
+      "destination": "/api/index"
     },
     {
-      "src": "client/index.html",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "dist/index.cjs"
+      "source": "/test-v1",
+      "destination": "/api/index"
     },
     {
-      "src": "/test-v1",
-      "dest": "dist/index.cjs"
-    },
-    {
-      "src": "/(assets|static)/(.*)",
-      "dest": "/client/$1/$2"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "dist/index.cjs"
+      "source": "/(.*)",
+      "destination": "/api/index"
     }
   ]
 }
