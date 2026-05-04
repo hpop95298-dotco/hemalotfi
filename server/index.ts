@@ -70,7 +70,29 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  try {
+    // 🏥 Health Check Endpoint for Diagnostics
+    app.get("/api/health", async (_req, res) => {
+      try {
+        const { sql } = await import("drizzle-orm");
+        await db.execute(sql`SELECT 1`);
+        return res.json({ 
+          status: "ok", 
+          database: "connected",
+          env: {
+            hasDbUrl: !!process.env.DATABASE_URL,
+            hasAdminPass: !!process.env.ADMIN_PASSWORD,
+            nodeEnv: process.env.NODE_ENV
+          }
+        });
+      } catch (e: any) {
+        return res.status(500).json({ 
+          status: "error", 
+          database: "disconnected", 
+          error: e.message 
+        });
+      }
+    });
+
     const server = registerRoutes(app);
 
     // Global Error handling middleware
