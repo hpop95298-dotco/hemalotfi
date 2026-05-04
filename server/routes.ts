@@ -211,7 +211,6 @@ export async function registerRoutes(
       !req.path.includes("/api/admin") &&
       !req.path.includes("/static")) {
       try {
-      try {
         const ip = req.ip || "1.1.1.1";
         let geo = null;
         try {
