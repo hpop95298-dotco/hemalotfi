@@ -4,6 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import cors from "cors";
 
 const app = express();
+app.set("trust proxy", 1); // Required for Vercel/proxies
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
