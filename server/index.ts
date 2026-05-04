@@ -15,8 +15,9 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// 🛡️ BARE MINIMUM TEST ROUTE
-app.get("/test", (_req, res) => res.status(200).send("SERVER_IS_ALIVE"));
+// 🛡️ BARE MINIMUM TEST ROUTES (Moved up)
+app.get("/api/test-v1", (_req, res) => res.status(200).json({ status: "SERVER_IS_ALIVE_V1" }));
+app.get("/test-v1", (_req, res) => res.status(200).send("SERVER_IS_ALIVE_V1"));
 
 // Basic CORS
 app.use(cors({
