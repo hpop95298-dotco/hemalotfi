@@ -1,10 +1,17 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite } from "./vite";
 import cors from "cors";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
-app.set("trust proxy", 1); // Required for Vercel/proxies
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -14,7 +21,42 @@ app.use(cors({
   credentials: true
 }));
 
-// Simple Request Logging
+// Simple Logging Helper
+function log(message: string) {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+  console.log(`${formattedTime} [INFO] [express] ${message}`);
+}
+
+// Custom ServeStatic for Vercel/Production
+function serveStatic(app: express.Express) {
+  const distPath = path.resolve(__dirname, "public");
+  
+  if (!fs.existsSync(distPath)) {
+    log(`Warning: public directory not found at ${distPath}`);
+  }
+
+  app.use(express.static(distPath));
+
+  // Fallback to index.html for SPA routing
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) {
+      return next();
+    }
+    const indexPath = path.resolve(distPath, "index.html");
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      next();
+    }
+  });
+}
+
+// Simple Request Logging Middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -31,7 +73,7 @@ app.use((req, res, next) => {
   try {
     const server = registerRoutes(app);
 
-    // Error handling middleware
+    // Global Error handling middleware
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error("[SERVER ERROR]:", err);
       const status = err.status || err.statusCode || 500;
@@ -40,7 +82,7 @@ app.use((req, res, next) => {
     });
 
     if (app.get("env") === "development") {
-      await setupVite(app, server);
+      await setupVite(server, app);
     } else {
       serveStatic(app);
     }
