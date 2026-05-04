@@ -107,7 +107,8 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true 
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 
 // 🛡️ Global Rate Limiter: General DDoS prevention
@@ -209,7 +210,17 @@ export const setupApp = async () => {
       console.error(err);
     }
 
-    if (res.headersSent) {
+    // Final Error Handler to prevent non-JSON crashes
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error("[GLOBAL ERROR]:", err);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({ 
+    message: err.message || "Internal Server Error",
+    error: process.env.NODE_ENV === "development" ? err : undefined
+  });
+});
+
+if (app.get("env") === "development") {
       return next(err);
     }
 
