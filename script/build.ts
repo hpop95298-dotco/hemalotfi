@@ -22,7 +22,6 @@ const allowlist = [
   "nanoid",
   "@neondatabase/serverless",
   "nodemailer",
-  "otplib",
   "passport",
   "passport-local",
   "pg",
