@@ -57,7 +57,14 @@ const validateUUID = (req: Request, res: Response, next: any) => {
   next();
 };
 
-const resend = new Resend(process.env.RESEND_API_KEY || "");
+let resend: Resend | null = null;
+if (process.env.RESEND_API_KEY) {
+  try {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  } catch (e) {
+    console.error("[RESEND INITIALIZATION ERROR]", e);
+  }
+}
 
 // --- Multer Setup ---
 const storage_multer = multer.diskStorage({
@@ -542,7 +549,7 @@ export async function registerRoutes(
       `;
 
       // 1. Try Resend
-      if (process.env.RESEND_API_KEY) {
+      if (resend) {
         try {
           await resend.emails.send({
             from: "Portfolio <onboarding@resend.dev>",
