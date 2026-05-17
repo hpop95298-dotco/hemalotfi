@@ -1,18 +1,11 @@
 {
   "version": 2,
-  "functions": {
-    "api/index.js": {
-      "runtime": "vercel-node@2.0.0"
-    }
-  },
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/public",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/api/index.js"
+      "destination": "/index.html"
     }
   ]
 }

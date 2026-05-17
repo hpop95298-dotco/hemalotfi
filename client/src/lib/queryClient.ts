@@ -1,5 +1,9 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// In production (Vercel), API calls go to Railway backend via VITE_API_URL
+// In development, Vite proxy handles /api → localhost:5001
+const API_BASE = import.meta.env.VITE_API_URL ?? "";
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -12,7 +16,8 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const fullUrl = url.startsWith("/api") ? `${API_BASE}${url}` : url;
+  const res = await fetch(fullUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -29,7 +34,9 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    const rawUrl = queryKey.join("/") as string;
+    const fullUrl = rawUrl.startsWith("/api") ? `${API_BASE}${rawUrl}` : rawUrl;
+    const res = await fetch(fullUrl, {
       credentials: "include",
     });
 

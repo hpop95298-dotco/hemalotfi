@@ -15,14 +15,28 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// 🛡️ BARE MINIMUM TEST ROUTES (Moved up)
+// 🛡️ BARE MINIMUM TEST ROUTES
 app.get("/api/test-v1", (_req, res) => res.status(200).json({ status: "SERVER_IS_ALIVE_V1" }));
 app.get("/test-v1", (_req, res) => res.status(200).send("SERVER_IS_ALIVE_V1"));
 
-// Basic CORS
+// CORS — allow Vercel frontend + localhost dev
 app.use(cors({
-  origin: true,
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    // Allow any vercel.app subdomain, localhost, and custom domain
+    const allowed = [
+      /\.vercel\.app$/,
+      /localhost/,
+      /ibrahimlotfi\.online/,
+      process.env.FRONTEND_URL,
+    ];
+    const isAllowed = allowed.some((pattern) =>
+      pattern instanceof RegExp ? pattern.test(origin) : origin === pattern
+    );
+    callback(null, isAllowed ? true : false);
+  },
+  credentials: true,
 }));
 
 // Simple Logging Helper
@@ -36,10 +50,10 @@ function log(message: string) {
   console.log(`${formattedTime} [INFO] [express] ${message}`);
 }
 
-// Custom ServeStatic for Vercel/Production
+// ServeStatic for Production (Railway serves the built frontend too)
 function serveStatic(app: express.Express) {
   const distPath = path.resolve(__dirname, "public");
-  
+
   if (!fs.existsSync(distPath)) {
     log(`Warning: public directory not found at ${distPath}`);
   }
@@ -60,46 +74,48 @@ function serveStatic(app: express.Express) {
   });
 }
 
-// Simple Request Logging Middleware
+// Request Logging Middleware
 app.use((req, res, next) => {
   const start = Date.now();
-  const path = req.path;
+  const reqPath = req.path;
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
+    if (reqPath.startsWith("/api")) {
+      log(`${req.method} ${reqPath} ${res.statusCode} in ${duration}ms`);
     }
   });
   next();
 });
 
 (async () => {
-    // 🏥 Health Check Endpoint for Diagnostics
+  try {
+    // 🏥 Health Check Endpoint
     app.get("/api/health", async (_req, res) => {
       try {
+        const { db } = await import("./db");
         const { sql } = await import("drizzle-orm");
         await db.execute(sql`SELECT 1`);
-        return res.json({ 
-          status: "ok", 
+        return res.json({
+          status: "ok",
           database: "connected",
           env: {
             hasDbUrl: !!process.env.DATABASE_URL,
             hasAdminPass: !!process.env.ADMIN_PASSWORD,
-            nodeEnv: process.env.NODE_ENV
-          }
+            nodeEnv: process.env.NODE_ENV,
+          },
         });
       } catch (e: any) {
-        return res.status(500).json({ 
-          status: "error", 
-          database: "disconnected", 
-          error: e.message 
+        return res.status(500).json({
+          status: "error",
+          database: "disconnected",
+          error: e.message,
         });
       }
     });
 
     const server = registerRoutes(app);
 
-    // Global Error handling middleware
+    // Global Error Handling Middleware
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error("[SERVER ERROR]:", err);
       const status = err.status || err.statusCode || 500;
@@ -113,14 +129,14 @@ app.use((req, res, next) => {
       serveStatic(app);
     }
 
-    const PORT = 5000;
-    if (process.env.NODE_ENV !== "production") {
-      server.listen(PORT, "0.0.0.0", () => {
-        log(`serving on port ${PORT}`);
-      });
-    }
+    // ✅ Use process.env.PORT for Railway compatibility
+    const PORT = parseInt(process.env.PORT || "5000");
+    server.listen(PORT, "0.0.0.0", () => {
+      log(`Server running on port ${PORT} [${process.env.NODE_ENV ?? "development"}]`);
+    });
   } catch (error) {
     console.error("CRITICAL BOOT ERROR:", error);
+    process.exit(1);
   }
 })();
 
