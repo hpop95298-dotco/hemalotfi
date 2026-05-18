@@ -394,14 +394,14 @@ export async function registerRoutes(
   app.get("/api/admin/2fa/setup", authenticateToken, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
-      const { authenticator } = await import("otplib");
-      const secret = authenticator.generateSecret();
+      const { generateSecret, generateURI } = await import("otplib");
+      const secret = generateSecret();
 
       return res.json({ 
         secret, 
         issuer: "IbrahimPortfolio", 
         account: user.username,
-        uri: authenticator.keyuri(user.username, "IbrahimPortfolio", secret)
+        uri: generateURI({ issuer: "IbrahimPortfolio", label: user.username, secret })
       });
     } catch (error) {
       return res.status(500).json({ message: "Failed to initiate 2FA" });
@@ -414,8 +414,8 @@ export async function registerRoutes(
       const user = (req as any).user;
       if (!secret || !code) return res.status(400).json({ message: "Secret and code required" });
 
-      const { authenticator } = await import("otplib");
-      const isValid = authenticator.verify({ token: code, secret });
+      const { verifySync } = await import("otplib");
+      const isValid = verifySync({ token: code, secret }).valid;
       if (!isValid) return res.status(400).json({ message: "Invalid verification code" });
 
       const dbUser = await storage.getUserByUsername(user.username);
@@ -1018,8 +1018,8 @@ export async function registerRoutes(
   app.get("/api/admin/2fa/setup", authenticateToken, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
-      const { authenticator } = await import("otplib");
-      const secret = authenticator.generateSecret();
+      const { generateSecret } = await import("otplib");
+      const secret = generateSecret();
       return res.json({ 
         secret, 
         instructions: `Save this Secret: ${secret}. Scan it using your authenticator app.` 
@@ -1036,8 +1036,8 @@ export async function registerRoutes(
       
       const user = (req as any).user;
       
-      const { authenticator } = await import("otplib");
-      const isValid = authenticator.verify({ token: code, secret });
+      const { verifySync } = await import("otplib");
+      const isValid = verifySync({ token: code, secret }).valid;
       
       if (isValid) {
         await storage.updateUser2FA(user.id, secret, true);

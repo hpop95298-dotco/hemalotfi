@@ -5,7 +5,7 @@ import {
 } from "../shared/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import crypto from "crypto";
-import { authenticator } from 'otplib';
+import { verifySync } from 'otplib';
 
 import type {
   InsertUser, User, InsertProject, Project, InsertMessage, Message,
@@ -486,7 +486,7 @@ export function decrypt(text: string): string {
 
 export function verifyTOTP(token: string, secret: string): boolean {
   try {
-    return authenticator.verify({ token, secret });
+    return verifySync({ token, secret }).valid;
   } catch (e) { 
     return false; 
   }

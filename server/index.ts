@@ -21,7 +21,7 @@ app.get("/test-v1", (_req, res) => res.status(200).send("SERVER_IS_ALIVE_V1"));
 
 // CORS — allow Vercel frontend + localhost dev
 app.use(cors({
-  origin: (origin, callback) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
     // Allow any vercel.app subdomain, localhost, and custom domain
@@ -113,7 +113,9 @@ app.use((req, res, next) => {
       }
     });
 
-    const server = registerRoutes(app);
+    const { createServer } = await import("http");
+    const httpServer = createServer(app);
+    const server = await registerRoutes(httpServer, app);
 
     // Global Error Handling Middleware
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

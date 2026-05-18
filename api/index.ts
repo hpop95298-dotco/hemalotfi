@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { createServer } from 'http';
 import { registerRoutes } from '../server/routes';
 
 const app = express();
@@ -19,7 +20,8 @@ let routesInitialized = false;
 app.use(async (req, res, next) => {
   if (!routesInitialized) {
     try {
-      await registerRoutes(app);
+      const httpServer = createServer(app);
+      await registerRoutes(httpServer, app);
       routesInitialized = true;
     } catch (err) {
       console.error("Initialization Error:", err);
