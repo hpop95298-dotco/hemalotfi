@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
-import { registerRoutes } from '../server/routes';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -13,33 +12,44 @@ app.use(cors({
   credentials: true
 }));
 
-// Health check — always works even if DB is down
+// Health check — always works because we don't import routes yet
 app.get('/api/health', (_req: Request, res: Response) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
-app.get('/api/test-v5', (_req: Request, res: Response) => res.json({ status: 'SERVER_IS_ALIVE_V5' }));
+app.get('/api/test-v6', (_req: Request, res: Response) => res.json({ status: 'SERVER_IS_ALIVE_V6' }));
 
-// Initialize routes at module load time (required for Vercel serverless)
-const httpServer = createServer(app);
+let isInitialized = false;
+let initError: any = null;
 
-let initError: unknown = null;
-const initPromise = registerRoutes(httpServer, app)
-  .catch((err: unknown) => {
-    console.error('[API] Failed to register routes:', err);
-    initError = err;
-  })
-  .then(() => {
-    // Global error handler must be added AT THE END of the routing stack
-    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      console.error('[API ERROR]:', err);
-      res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
-    });
-  });
-
-// Middleware to wait for route initialization before processing the request
+// Blocking middleware with dynamic import to catch top-level evaluation errors
 app.use(async (req: Request, res: Response, next: NextFunction) => {
-  await initPromise;
-  if (initError) {
-    return res.status(500).json({ message: 'Server initialization failed', error: String(initError) });
+  if (!isInitialized && !initError) {
+    try {
+      // DYNAMIC IMPORT! If top-level code in routes.ts crashes, we catch it here!
+      const { registerRoutes } = await import('../server/routes');
+      const httpServer = createServer(app);
+      await registerRoutes(httpServer, app);
+      
+      // Append global error handler
+      app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+        console.error('[API ERROR]:', err);
+        res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
+      });
+      
+      isInitialized = true;
+    } catch (err: any) {
+      console.error('[API] Failed to initialize (Dynamic Import):', err);
+      initError = err;
+    }
   }
+
+  if (initError) {
+    return res.status(500).json({ 
+      message: 'Server initialization failed due to a module crash', 
+      errorName: initError.name,
+      errorMessage: initError.message,
+      errorStack: initError.stack 
+    });
+  }
+  
   next();
 });
 
