@@ -66,11 +66,12 @@ if (process.env.RESEND_API_KEY) {
   }
 }
 
-// --- Multer Setup ---
 const storage_multer = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    const uploadPath = path.resolve(process.cwd(), "uploads");
-    if (!fs.existsSync(uploadPath)) {
+    // Vercel only allows writing to /tmp
+    const isVercel = !!process.env.VERCEL || process.env.NODE_ENV === 'production';
+    const uploadPath = isVercel ? "/tmp" : path.resolve(process.cwd(), "uploads");
+    if (!isVercel && !fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
     cb(null, uploadPath);

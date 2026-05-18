@@ -1,6 +1,6 @@
-const express = require('express');
-const cors = require('cors');
-const { registerRoutes } = require('../server/routes.js');
+import express from 'express';
+import cors from 'cors';
+import { registerRoutes } from '../server/routes';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -12,7 +12,6 @@ app.use(cors({
   credentials: true
 }));
 
-// DIAGNOSTIC V4
 app.get('/api/test-v4', (req, res) => res.json({ status: "SERVER_IS_ALIVE_V4" }));
 
 let routesInitialized = false;
@@ -29,4 +28,4 @@ app.use(async (req, res, next) => {
   next();
 });
 
-module.exports = app;
+export default app;
