@@ -21,22 +21,26 @@ app.get('/api/test-v5', (_req: Request, res: Response) => res.json({ status: 'SE
 const httpServer = createServer(app);
 
 let initError: unknown = null;
-const initPromise = registerRoutes(httpServer, app).catch((err: unknown) => {
-  console.error('[API] Failed to register routes:', err);
-  initError = err;
-});
+const initPromise = registerRoutes(httpServer, app)
+  .catch((err: unknown) => {
+    console.error('[API] Failed to register routes:', err);
+    initError = err;
+  })
+  .then(() => {
+    // Global error handler must be added AT THE END of the routing stack
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      console.error('[API ERROR]:', err);
+      res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
+    });
+  });
 
-// Global error handler — always returns JSON
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('[API ERROR]:', err);
-  res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
-});
-
-// Export a handler that waits for init before serving
-export default async function handler(req: Request, res: Response) {
+// Middleware to wait for route initialization before processing the request
+app.use(async (req: Request, res: Response, next: NextFunction) => {
   await initPromise;
   if (initError) {
     return res.status(500).json({ message: 'Server initialization failed', error: String(initError) });
   }
-  return app(req, res);
-}
+  next();
+});
+
+export default app;
